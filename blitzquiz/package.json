@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "material-design-icons-iconfont": "^5.0.1",
     "vue": "^2.6.10",
+    "vue-resource": "^1.5.1",
     "vue-router": "^3.0.3",
     "vue-worker": "^1.2.1",
     "vuetify": "^1.5.16",
