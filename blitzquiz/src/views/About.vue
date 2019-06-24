@@ -1,16 +1,19 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
-    <screener></screener>
+    <!-- <screener></screener> -->
+    <!-- <permissions></permissions> -->
+    <crawler></crawler>
   </div>
 </template>
 
 <script>
 import Screener from '@/components/Screener.vue'
+import Permissions from '@/components/Permissions.vue'
+import Crawler from '@/components/Crawler.vue'
 export default {
   name: "About",
   components: {
-    Screener
+    Screener, Permissions,Crawler
   }
 }
 </script>
