@@ -7,7 +7,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     screeningData: {},
-    categoryData: {}
+    categoryData: {},
+    preferenceData: {}
   },
   mutations: {
     screening_data: (state, data)=>{
@@ -15,17 +16,28 @@ export default new Vuex.Store({
     },
     category_data: (state, data)=>{
       state.categoryData = data;
+    },
+    preference_data: (state, data)=>{
+      state.preferenceData = data;
     }
   },
   actions: {
     getScreeningDataFromCMS: ({commit}, {data, success})=>{
       commonApi.getScreeningData(data,(response)=>{
         commit('screening_data', response.body)
-        console.log(response.body)
         success()
         //alert('Success')
       },()=>{
         alert('Data Get Failure!!')
+      })
+    },
+    getCategories: ({commit}, success)=>{
+      commonApi.getCategories((response)=>{
+        commit('category_data', response.body)
+        success()
+        //alert('Success')
+      },()=>{
+        alert('Category Call Failure!!')
       })
     },
     setScreenedData: ({commit}, {data, success})=>{
@@ -45,13 +57,11 @@ export default new Vuex.Store({
         alert('UnScreened Data Post Failure!!')
       })
     },
-    getCategories: ({commit}, success)=>{
-      commonApi.getCategories((response)=>{
-        commit('category_data', response.body)
-        success()
-        //alert('Success')
-      },()=>{
-        alert('Category Call Failure!!')
+    savePreferences:({commit}, data)=>{
+      commonApi.savePreferences(data,()=>{
+        commit('preference_data', data);
+      },(error)=>{
+        alert(error.body)
       })
     }
   },
@@ -61,6 +71,9 @@ export default new Vuex.Store({
     },
     getCategoryData: state=> {
       return state.categoryData;
+    },
+    getPreferencesData: state => {
+      return state.preferenceData;
     }
   }
 })
