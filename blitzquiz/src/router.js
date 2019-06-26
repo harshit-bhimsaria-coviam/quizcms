@@ -24,6 +24,11 @@ export default new Router({
       path: '/permissions',
       name: 'Permissions',
       component: Permissions
+    },
+    {
+      path: '/screener',
+      name: 'screener',
+      component: () => import("./components/Screener.vue")
     }
   ]
 })

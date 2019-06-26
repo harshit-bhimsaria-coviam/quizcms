@@ -8,7 +8,8 @@ export default new Vuex.Store({
   state: {
     screeningData: {},
     categoryData: {},
-    preferenceData: {}
+    preferenceData: {},
+    allUserData: {}
   },
   mutations: {
     screening_data: (state, data)=>{
@@ -19,6 +20,9 @@ export default new Vuex.Store({
     },
     preference_data: (state, data)=>{
       state.preferenceData = data;
+    },
+    all_user_data: (state, data)=>{
+      state.allUserData = data;
     }
   },
   actions: {
@@ -63,6 +67,20 @@ export default new Vuex.Store({
       },(error)=>{
         alert(error.body)
       })
+    },
+    uploadFile:({commit}, {formData, email})=>{
+      commonApi.uploadFile(formData,email,(response)=>{
+        console.log(response.bodyText)
+      },(error)=>{
+          alert(error.bodyText)
+      })
+    },
+    getAllUsers:({commit})=>{
+      commonApi.getAllUsers((response)=>{
+        commit('all_user_data', response.body)
+      },()=>{
+        alert("All User Call Failed")
+      })
     }
   },
   getters: {
@@ -74,6 +92,9 @@ export default new Vuex.Store({
     },
     getPreferencesData: state => {
       return state.preferenceData;
+    },
+    getAllUserData: state=>{
+      return state.allUserData;
     }
   }
 })
