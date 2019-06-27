@@ -1,9 +1,9 @@
 <template>
   <div class="about">
-    <screener></screener>
+    <!-- <screener></screener> -->
     <!-- <permissions></permissions> -->
     <!-- <crawler></crawler> -->
-    <!-- <profile-edit></profile-edit> -->
+    <profile-edit></profile-edit>
     <!-- <preferences></preferences> -->
     
     <!-- <v-app>

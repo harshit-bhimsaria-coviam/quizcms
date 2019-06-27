@@ -30,7 +30,6 @@
           :key="i"
         >-->
         <v-layout v-if="!category" row wrap style="background-color: white">
-          {{getScreeningData}}
           <v-card
             v-for="(item,i) in getScreeningData"
             :key="i"
@@ -84,7 +83,7 @@
             <hr>
             <v-card-text>
               <v-btn color="error" @click="reject(i)">Reject</v-btn>
-              <v-btn color="success" @click="accept()">Accept</v-btn>
+              <v-btn color="success" @click="accept(i)">Accept</v-btn>
             </v-card-text>
           </v-card>
         </v-layout>
@@ -121,54 +120,85 @@ export default {
       "setScreenedData",
       "setUnScreenedData"
     ]),
-    accept() {
-      if (this.len < this.items.length - 1) {
+    accept(i) {
+      this.getScreeningData[i].isScreened = "1";
+      this.getScreeningData[i].isRejected = "0";
+      var sounds = document.getElementsByTagName('audio');
+      let j=0;
+      for(j=0; j<sounds.length; j++) sounds[j].pause();
+      if (this.len == this.items.length-1) this.submit();
+      else {
         this.len += 1;
-      } else {
-        // console.log(this.len)
-        this.submit();
+        while (this.getScreeningData[this.len].isScreened == "1") {
+          if (this.len == this.items.length - 1) {
+            this.len = 0;
+            alert("No more Questions in this Catrgory!!");
+            this.category = true;
+            break;
+          }
+          this.len += 1;
+        }
       }
-      // console.log(this.len)
+      // console.log(this.getScreeningData, i)
     },
     reject(i) {
-      this.deletelist.push(i);
-      if (this.len < this.items.length - 1) this.len += 1;
+      this.getScreeningData[i].isScreened = "1";
+      this.getScreeningData[i].isRejected = "1";
+      var sounds = document.getElementsByTagName('audio');
+      let j=0;
+      for(j=0; j<sounds.length; j++) sounds[j].pause();
+      if (this.len == this.items.length-1) this.submit();
       else {
-        this.submit();
+        this.len += 1;
+        while (this.getScreeningData[this.len].isScreened == "1") {
+          if (this.len == this.items.length - 1) {
+            this.len = 0;
+            alert("No more Questions in this Catrgory!!");
+            this.category = true;
+            break;
+          }
+          this.len += 1;
+        }
       }
-      // console.log(this.len)
+      // console.log(this.getScreeningData, i)
     },
     submit() {
-      let queNo = this.getScreeningData[this.len].queNo;
-      let category = this.getScreeningData[this.len].category;
-      this.deletelist.forEach(element => {
-        this.items.splice(element, 1);
-      });
-      this.deletelist = [];
-      let temp = [];
-      let temp2 = this.items.splice(0, this.len);
+      var sounds = document.getElementsByTagName('audio');
+      let j=0;
+      for(j=0; j<sounds.length; j++) sounds[j].pause();
+      let sceenedData = [];
+      let unsceenedData = [];
       let temp3 = {};
-      temp2.forEach(ele => {
-        temp3.questionText = ele.question;
-        temp3.answers = [];
-        temp3.answers.push(ele.option1, ele.option2, ele.option3, ele.option4);
-        temp3.answerType = ele.answerType;
-        temp3.questionType = ele.questionType;
-        temp3.rightAnswers = ele.rightAnswer;
-        temp3.difficultyLevel = ele.difficultyLevel;
-        temp3.resourceUrl = ele.binaryPath;
-        temp3.category = ele.category;
+      this.getScreeningData.forEach(ele => {
+        if (ele.isScreened == "1" && ele.isRejected == "0") {
+          // console.log(ele, "isScreenedSubmit")
+          temp3.id = ele.queNo;
+          temp3.questionText = ele.question;
+          temp3.answers = [];
+          temp3.answers.push(
+            ele.option1,
+            ele.option2,
+            ele.option3,
+            ele.option4
+          );
+          temp3.answerType = ele.answerType;
+          temp3.questionType = ele.questionType;
+          temp3.rightAnswers = ele.rightAnswer;
+          temp3.difficultyLevel = ele.difficultyLevel;
+          temp3.resourceUrl = ele.binaryPath;
+          temp3.category = ele.category;
 
-        temp.push(temp3);
-        temp3 = {};
+          sceenedData.push(temp3);
+          temp3 = {};
+          unsceenedData.push(ele);
+        } else {
+          unsceenedData.push(ele);
+        }
       });
       this.$store.dispatch("setScreenedData", {
-        data: temp,
+        data: sceenedData,
         success: () => {
-          this.$store.dispatch("setUnScreenedData", {
-            quesNo: queNo,
-            category: category
-          });
+          this.$store.dispatch("setUnScreenedData", unsceenedData);
         }
       });
       this.category = true;
@@ -181,6 +211,15 @@ export default {
           success: () => {
             this.category = false;
             this.items = this.getScreeningData;
+            while (this.getScreeningData[this.len].isScreened == "1") {
+              if (this.len == this.items.length - 1) {
+                this.len = 0;
+                alert("No more Questions in this Catrgory!!");
+                this.category = true;
+                break;
+              }
+              this.len += 1;
+            }
           }
         });
       } else alert("Select a category");
@@ -190,11 +229,11 @@ export default {
     ...mapGetters(["getScreeningData", "getCategoryData"])
   },
   created() {
-    // this.$store.dispatch("getCategories", () => {
-    //   this.categoryList = this.getCategoryData.map(obj => {
-    //     return obj.categoryName;
-    //   });
-    // });
+    this.$store.dispatch("getCategories", () => {
+      this.categoryList = this.getCategoryData.map(obj => {
+        return obj.categoryName;
+      });
+    });
   }
 };
 </script>

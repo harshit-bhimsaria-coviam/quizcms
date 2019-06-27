@@ -29,6 +29,16 @@ export default new Router({
       path: '/screener',
       name: 'screener',
       component: () => import("./components/Screener.vue")
+    },
+    {
+      path: '/cms',
+      name: 'cms',
+      component: () => import("./views/Cms.vue")
+    },
+    {
+      path: '/category/:selectedCategory',
+      name: 'category',
+      component: () => import("./views/Category.vue")
     }
   ]
 })

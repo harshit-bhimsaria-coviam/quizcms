@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <input id="inputUpload" type="file" style="display: none" @change="fileChange">
     <v-container grid-list-md>
       <v-card color="info">
         <v-layout row wrap>
@@ -8,9 +9,11 @@
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-img
+                    @click="imgClick"
+                    style="cursor: pointer"
                     height="320px"
                     width="320px"
-                    src="http://civilcode.ge/images/2/24/Blank-avatar.png"
+                    :src="url"
                   />
                 </v-flex>
               </v-layout>
@@ -39,10 +42,10 @@
                       :type="show1 ? 'text' : 'password'"
                       name="input-10-1"
                       label="Password"
-                      hint="At least 8 characters"
+                      hint="8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special character"
                       counter
                       @click:append="show1 = !show1"
-                      color="white"
+                      :color="passwordValidation"
                       dark
                     ></v-text-field>
                   </v-flex>
@@ -93,7 +96,7 @@
         </v-layout>
         <v-layout row wrap justify-center>
           <v-flex>
-            <v-btn large>Submit</v-btn>
+            <v-btn large>Update</v-btn>
           </v-flex>
         </v-layout>
         <br>
@@ -129,8 +132,29 @@ export default {
     items: ["Item 1", "Item 2", "Item 3", "Item 4"],
     checkbox: false,
     password: "",
-    show1: false
-  })
+    show1: false,
+    url: "http://civilcode.ge/images/2/24/Blank-avatar.png"
+  }),
+  computed: {
+    passwordValidation(){
+      let decimal = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+      if(this.password == "")
+        return "white"
+      else if(this.password.match(decimal))
+        return "green"
+      else
+        return "red"
+    }
+  },
+  methods:{
+    fileChange(e){
+      const file = e.target.files[0];
+      this.url = URL.createObjectURL(file);
+    },
+    imgClick(){
+      document.getElementById("inputUpload").click();
+    }
+  }
 };
 </script>
 

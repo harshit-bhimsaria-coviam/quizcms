@@ -44,7 +44,7 @@ export default new Vuex.Store({
         alert('Category Call Failure!!')
       })
     },
-    setScreenedData: ({commit}, {data, success})=>{
+    setScreenedData: (obj, {data, success})=>{
       commonApi.setScreenedData(data,()=>{
         //commit('screening_data', response.body)
         alert('Screened Data Sent')
@@ -53,8 +53,8 @@ export default new Vuex.Store({
         alert('Screened Data Post Failure!!')
       })
     },
-    setUnScreenedData: ({commit}, {quesNo, category})=>{
-      commonApi.setUnScreenedData(quesNo, category,()=>{
+    setUnScreenedData: (obj, unsceenedData)=>{
+      commonApi.setUnScreenedData(unsceenedData,()=>{
         // commit('screening_data', response.body)
         alert('Unscreened Data Sent')
       },()=>{
@@ -68,7 +68,7 @@ export default new Vuex.Store({
         alert(error.body)
       })
     },
-    uploadFile:({commit}, {formData, email})=>{
+    uploadFile:(obj, {formData, email})=>{
       commonApi.uploadFile(formData,email,(response)=>{
         console.log(response.bodyText)
       },(error)=>{

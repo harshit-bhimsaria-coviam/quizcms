@@ -2,12 +2,12 @@
   <v-container grid-list-md>
     <v-layout justify-center="true" align-center="true" dark="true" row wrap>
       <v-flex xs10>
-        <v-card dark color="red">
+        <v-card dark color="#1976D2">
           <h1>Permissions</h1>
         </v-card>
       </v-flex>
       <v-flex xs10>
-        <v-card style="height: 75vh; overflow: auto">
+        <v-card>
           <v-list>
             <v-list-tile>
               <v-flex xs1><v-list-tile-avatar>S No.</v-list-tile-avatar></v-flex>
@@ -17,9 +17,13 @@
               <v-flex xs2><v-list-tile-action>Screener</v-list-tile-action></v-flex>
               <v-flex xs2><v-list-tile-action>Quiz Master</v-list-tile-action></v-flex>
             </v-list-tile>
+          </v-list>
+        </v-card>
+        <v-card style="height: 60vh; overflow: scroll">
+          <v-list>
             <v-list-tile
               v-for="(item, index) in getAllUserData"
-              :key="item.userName"
+              :key="index"
               avatar
             >
               <v-flex xs1>
@@ -57,11 +61,15 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-layout justify-center>
+      <v-btn color="success" @click="updatePermissions()">Update</v-btn>
+    </v-layout>
   </v-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import commonApi from '../../api/index.js'
 export default {
   name: 'Permissions',
   data () {
@@ -86,6 +94,9 @@ export default {
         item.role='Quiz Master'
       else if(i==1  && item.role=='Quiz Master')
         item.role=''
+    },
+    updatePermissions(){
+      commonApi.updatePermissions(this.getAllUserData, ()=>{alert("Permissions Update Successful!!")}, ()=>{alert("Permissions Update UnSuccessful!!")})
     }
   },
   computed:{
