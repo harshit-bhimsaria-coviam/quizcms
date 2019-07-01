@@ -31,7 +31,7 @@ export default new Router({
       component: () => import("./components/Screener.vue")
     },
     {
-      path: '/cms',
+      path: '/cms/:role',
       name: 'cms',
       component: () => import("./views/Cms.vue")
     },
@@ -39,6 +39,41 @@ export default new Router({
       path: '/category/:selectedCategory',
       name: 'category',
       component: () => import("./views/Category.vue")
+    },
+    {
+      path:'/createquiz/:questionNo',
+      name:'createquiz',
+      component: () => import('./pages/createquiz.vue')
+    },
+    {
+      path:'/contestCreated/:contestName/:category',
+      name:'ContestCreated',
+      component: () => import('./pages/ContestCreated.vue')
+    },
+    {
+      path: '/contestCreate',
+      name: 'contestCreate',
+      component: () => import('./pages/ContestCreate.vue')
+    },
+    {
+      path: '/quizWelcome',
+      name: 'Quiz Welcome Page',
+      component: () => import('./components/QuizWelcome.vue')
+    },
+    {
+      path: '/quizPage',
+      name: 'Quiz Page',
+      component: () => import('./components/QuizPage.vue')
+    },
+    {
+      path: '/QuizFinish',
+      name: 'Quiz Finish Page',
+      component: () => import('./components/QuizFinish.vue')
+    },
+    {
+      path: '/view',
+      name: 'All Contests',
+      component: () => import('./components/Viewcontest.vue')
     }
   ]
 })

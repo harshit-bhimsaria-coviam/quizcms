@@ -24,9 +24,9 @@
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-flex xs12>
-                    <v-text-field v-model="name" :rules="nameRules" solo hide-details label="Name"></v-text-field>
+                    <v-text-field v-model="userData.userName" :rules="nameRules" solo hide-details label="Name"></v-text-field>
                   </v-flex>
-                  <v-flex xs12>
+                  <!-- <v-flex xs12>
                     <v-text-field
                       v-model="phone"
                       :mask="mask"
@@ -34,7 +34,7 @@
                       hide-details
                       label="Contact Number"
                     ></v-text-field>
-                  </v-flex>
+                  </v-flex> -->
                   <v-flex xs12>
                     <v-text-field
                       v-model="password"
@@ -55,7 +55,7 @@
                         <h2 style="color: white">Gender:</h2>
                       </v-flex>
                       <v-flex xs10>
-                        <v-radio-group v-model="gender" row dark>
+                        <v-radio-group v-model="userData.gender" row dark>
                           <v-radio label="Male" value="male" color="white"></v-radio>
                           <v-radio label="Female" value="female" color="white"></v-radio>
                         </v-radio-group>
@@ -75,17 +75,17 @@
                       <template v-slot:activator="{ on }">
                         <v-text-field
                           dark
-                          v-model="date"
+                          v-model="userData.dob"
                           label="Date of Birth"
                           prepend-icon="event"
                           readonly
                           v-on="on"
                         ></v-text-field>
                       </template>
-                      <v-date-picker v-model="date" scrollable>
+                      <v-date-picker v-model="userData.dob" scrollable>
                         <v-spacer></v-spacer>
                         <v-btn flat color="primary" @click="modal = false">Cancel</v-btn>
-                        <v-btn flat color="primary" @click="$refs.dialog.save(date)">OK</v-btn>
+                        <v-btn flat color="primary" @click="$refs.dialog.save(userData.dob)">OK</v-btn>
                       </v-date-picker>
                     </v-dialog>
                   </v-flex>
@@ -96,7 +96,7 @@
         </v-layout>
         <v-layout row wrap justify-center>
           <v-flex>
-            <v-btn large>Update</v-btn>
+            <v-btn large @click="updateProfile()">Update</v-btn>
           </v-flex>
         </v-layout>
         <br>
@@ -106,9 +106,13 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import commonApi from '../../api';
 export default {
   name: "ProfileEdit",
   data: () => ({
+    fileUpload: false,
+    userData: {},
     showLoading: false,
     valid: false,
     mask: "phone",
@@ -129,9 +133,9 @@ export default {
       v => /.+@.+/.test(v) || "E-mail must be valid"
     ],
     select: null,
-    items: ["Item 1", "Item 2", "Item 3", "Item 4"],
     checkbox: false,
     password: "",
+    passwordCheck: false,
     show1: false,
     url: "http://civilcode.ge/images/2/24/Blank-avatar.png"
   }),
@@ -140,20 +144,51 @@ export default {
       let decimal = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
       if(this.password == "")
         return "white"
-      else if(this.password.match(decimal))
+      else if(this.password.match(decimal)){
+        this.passwordCheck = true;
         return "green"
-      else
+      }
+      else{
+        this.passwordCheck = false;
         return "red"
+      }
     }
   },
   methods:{
+    ...mapActions(['uploadFile', 'updateProfile', 'getOne']),
     fileChange(e){
       const file = e.target.files[0];
       this.url = URL.createObjectURL(file);
+      this.fileUpload = true
     },
     imgClick(){
       document.getElementById("inputUpload").click();
+    },
+    updateProfile(){
+      if(this.password!="" && this.passwordCheck)
+        this.userData.password = this.password
+      commonApi.updateProfile(this.userData,(response)=>{
+        if(this.fileUpload){
+          var x = document.getElementById("inputUpload");
+          var formData = new FormData()
+          formData.append('file', x.files[0], x.files[0].name);
+          var email = "1360bd5b-d8c9-44ad-8da3-08772e777a9e";
+          this.$store.dispatch('uploadFile', {formData:formData,email:email})
+          alert("Update Success!!")
+          this.$router.push('/')
+        }
+      },()=>{alert("Profile Update Failed!!")})
     }
+  },
+  created(){
+    //this.getAuthedUser.id
+    commonApi.getOne("1360bd5b-d8c9-44ad-8da3-08772e777a9e", (response)=>{
+      this.userData = response.body;
+      this.url = "https://drive.google.com/uc?export=view&id="+this.userData.userAvatar
+      // this.date = this.userData.dob
+    },(error)=>{
+      alert("Get User Data failed")
+    })
   }
 };
 </script>

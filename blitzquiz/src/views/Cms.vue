@@ -38,6 +38,7 @@
       <v-tab-item
         value="tab-3"
       >
+      <ContestCreate></ContestCreate>
       </v-tab-item>
       
       <v-tab-item
@@ -53,14 +54,15 @@
 import Screener from '@/components/Screener.vue'
 import Permissions from '@/components/Permissions.vue'
 import Crawler from '@/components/Crawler.vue'
+import ContestCreate from '@/pages/ContestCreate.vue'
 export default {
   name: 'Cms',
   components: {
-    Screener, Permissions, Crawler
+    Screener, Permissions, Crawler, ContestCreate
   },
   data(){
     return{
-      role: "admin"
+      role: this.$route.params.role
     }
   }
 };

@@ -7,7 +7,7 @@
             <h1>Screening</h1>
           </v-card>
         </v-layout>
-        <v-layout v-if="category">
+        <v-layout v-if="!category">
           <v-flex>
             <v-card>
               <h1>Select a Category of Questions</h1>
@@ -24,72 +24,61 @@
             <v-btn dark color="primary" @click="next()" style="width: 200px">Next</v-btn>
           </v-flex>
         </v-layout>
-        <!-- <v-carousel v-if="!category" hide-delimiters hide-controls v-model="len" :cycle="false" height=auto light class="cara">
-        <v-carousel-item
-          v-for="(item,i) in items"
-          :key="i"
-        >-->
         <v-layout v-if="!category" row wrap style="background-color: white">
-          <v-card
-            v-for="(item,i) in getScreeningData"
-            :key="i"
-            height="auto"
-            width="100%"
-            :class="[i==len?'visibleClass':'invisibleClass']"
-          >
-            <!-- <v-card-text class="px-0"><h1>Question {{item.queNo}}</h1></v-card-text>
-            <hr>-->
-            <center>
-              <v-img
-                style="max-height: 300px; max-width: 200px"
-                v-if="item.questionType == 'Image'"
-                :src="item.binaryPath"
-              />
-            </center>
-            <audio v-if="item.questionType == 'voice' || item.questionType == 'Audio'" controls>
-              <source :src="item.binaryPath">
-            </audio>
-            <v-card-text>
-              <p>{{item.question}}</p>
-            </v-card-text>
-            <v-card-text>
-              <h2>Answers</h2>
-              <v-btn disabled>{{item.option1}}</v-btn>
-              <v-btn disabled>{{item.option2}}</v-btn>
-              <v-btn disabled>{{item.option3}}</v-btn>
-              <v-btn disabled>{{item.option4}}</v-btn>
-            </v-card-text>
-            <hr>
-            <v-layout row>
-              <v-flex xs4>
-                <v-card-text>
-                  <h2>Difficulty</h2>
-                  <p>{{item.difficultyLevel}}</p>
-                </v-card-text>
-              </v-flex>
-              <v-flex xs4>
-                <v-card-text>
-                  <h2>Question Type</h2>
-                  <p>{{item.questionType}}</p>
-                </v-card-text>
-              </v-flex>
-              <v-flex xs4>
-                <v-card-text>
-                  <h2>Answer Type</h2>
-                  <p>{{item.answerType}}</p>
-                </v-card-text>
-              </v-flex>
-            </v-layout>
-            <hr>
-            <v-card-text>
-              <v-btn color="error" @click="reject(i)">Reject</v-btn>
-              <v-btn color="success" @click="accept(i)">Accept</v-btn>
-            </v-card-text>
-          </v-card>
+          {{getScreeningData}}
+          <v-data-table style="width: 100%" :items="items" select-all v-model="selected" item-key="question" class="elevation-1" hide-actions>
+            <template v-slot:headers="props">
+              <tr>
+                <th
+                  v-for="header in headers"
+                  :key="header.text"
+                >
+                  {{ header.text }}
+                </th>
+              </tr>
+            </template>
+            <template v-slot:items="props">
+              <tr>
+                <td class="text-xs-left question">
+                  <center>
+                    <v-img
+                      style="max-height: 200px; max-width: 150px"
+                      v-if="props.item.questionType == 'Image'"
+                      :src="props.item.binaryPath"
+                    />
+                  </center>
+                  <audio v-if="props.item.questionType == 'voice' || props.item.questionType == 'Audio'" controls style="margin: 10px 0px">
+                    <source :src="props.item.binaryPath">
+                  </audio><br>
+                  {{ props.item.question }}
+                </td>
+                <td class="text-xs-left">
+                  {{ props.item.option1 }}, {{props.item.option2}}, {{props.item.option3}}, {{props.item.option4}}
+                </td>
+                <td class="text-xs-left rightanswer">
+                  {{ props.item.rightAnswer }}
+                </td>
+                <td class="text-xs-left difficultylevel">
+                  {{ props.item.difficultyLevel }}
+                </td>
+                <td class="text-xs-left answertype">
+                  {{ props.item.answerType }}
+                </td>
+                <td class="text-xs-left answertype">
+                  <v-checkbox
+                    v-model="props.item.isRejected"
+                    primary
+                    hide-details
+                  ></v-checkbox>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
         </v-layout>
-        <!-- </v-carousel-item>
-        </v-carousel>-->
         <v-layout v-if="!category" justify-center="true" align-center="true" dark="true" row wrap>
+          <v-flex>
+            <v-btn dark color="primary" @click="nextPage()" style="width: 200px">Next Page</v-btn>
+          </v-flex>
           <v-flex>
             <v-btn dark color="primary" @click="submit()" style="width: 200px">Leave</v-btn>
           </v-flex>
@@ -105,11 +94,23 @@ export default {
   name: "Screener",
   data() {
     return {
+      headers: [
+        {
+          text: 'Question',
+          value: 'question'
+        },
+        { text: 'Options', value: 'option' },
+        { text: 'Right Answer', value: 'answer' },
+        { text: 'Difficulty', value: 'difficulty' },
+        { text: 'Answer Type', value: 'anstype' },
+        { text: 'Approved', value: 'isRejected' }
+      ],
+      selected: [],
       items: [],
       len: 0,
       deletelist: [],
       categoryList: [],
-      category: true, //True
+      category: true, 
       categorySelected: ""
     };
   },
@@ -120,58 +121,24 @@ export default {
       "setScreenedData",
       "setUnScreenedData"
     ]),
-    accept(i) {
-      this.getScreeningData[i].isScreened = "1";
-      this.getScreeningData[i].isRejected = "0";
-      var sounds = document.getElementsByTagName('audio');
-      let j=0;
-      for(j=0; j<sounds.length; j++) sounds[j].pause();
-      if (this.len == this.items.length-1) this.submit();
-      else {
-        this.len += 1;
-        while (this.getScreeningData[this.len].isScreened == "1") {
-          if (this.len == this.items.length - 1) {
-            this.len = 0;
-            alert("No more Questions in this Catrgory!!");
-            this.category = true;
-            break;
-          }
-          this.len += 1;
-        }
-      }
-      // console.log(this.getScreeningData, i)
-    },
-    reject(i) {
-      this.getScreeningData[i].isScreened = "1";
-      this.getScreeningData[i].isRejected = "1";
-      var sounds = document.getElementsByTagName('audio');
-      let j=0;
-      for(j=0; j<sounds.length; j++) sounds[j].pause();
-      if (this.len == this.items.length-1) this.submit();
-      else {
-        this.len += 1;
-        while (this.getScreeningData[this.len].isScreened == "1") {
-          if (this.len == this.items.length - 1) {
-            this.len = 0;
-            alert("No more Questions in this Catrgory!!");
-            this.category = true;
-            break;
-          }
-          this.len += 1;
-        }
-      }
-      // console.log(this.getScreeningData, i)
-    },
     submit() {
-      var sounds = document.getElementsByTagName('audio');
-      let j=0;
-      for(j=0; j<sounds.length; j++) sounds[j].pause();
+      var sounds = document.getElementsByTagName("audio");
+      let j = 0;
+      for (j = 0; j < sounds.length; j++) sounds[j].pause();
+      this.category = true;
+      this.len = 0;
+    },
+    nextPage(){
+      var sounds = document.getElementsByTagName("audio");
+      let j = 0;
+      for (j = 0; j < sounds.length; j++) sounds[j].pause();
       let sceenedData = [];
       let unsceenedData = [];
       let temp3 = {};
-      this.getScreeningData.forEach(ele => {
-        if (ele.isScreened == "1" && ele.isRejected == "0") {
-          // console.log(ele, "isScreenedSubmit")
+      this.items.forEach(ele => {
+        ele.isScreened = "1"
+        if (ele.isRejected == true) {
+          ele.isRejected = "1"
           temp3.id = ele.queNo;
           temp3.questionText = ele.question;
           temp3.answers = [];
@@ -192,17 +159,34 @@ export default {
           temp3 = {};
           unsceenedData.push(ele);
         } else {
+          ele.isRejected = "0"
           unsceenedData.push(ele);
         }
       });
       this.$store.dispatch("setScreenedData", {
         data: sceenedData,
         success: () => {
-          this.$store.dispatch("setUnScreenedData", unsceenedData);
+          this.$store.dispatch("setUnScreenedData", {unsceenedData: unsceenedData, success:()=>{
+            this.items = []
+            this.$store.dispatch("getScreeningDataFromCMS", {
+              data: this.categorySelected,
+              success: () => {
+                this.items = this.getScreeningData;
+                this.getScreeningData.forEach(element => {
+                  if(element.isRejected == "0")
+                    element.isRejected = false
+                  else
+                    element.isRejected = true
+                });
+                if(this.items.length === 0){
+                  alert("No Questions Recieved!!")
+                  this.category = true;
+                }
+              }
+            });
+          }});
         }
       });
-      this.category = true;
-      this.len = 0;
     },
     next() {
       if (this.categorySelected !== "") {
@@ -211,14 +195,15 @@ export default {
           success: () => {
             this.category = false;
             this.items = this.getScreeningData;
-            while (this.getScreeningData[this.len].isScreened == "1") {
-              if (this.len == this.items.length - 1) {
-                this.len = 0;
-                alert("No more Questions in this Catrgory!!");
-                this.category = true;
-                break;
-              }
-              this.len += 1;
+            this.getScreeningData.forEach(element => {
+              if(element.isRejected == "0")
+                element.isRejected = false
+              else
+                element.isRejected = true
+            });
+            if(this.items.length === 0){
+              alert("No Questions Recieved!!")
+              this.category = true;
             }
           }
         });
@@ -254,5 +239,21 @@ p {
 
 .invisibleClass {
   display: none;
+}
+.question {
+  width: 38em;
+  max-width: 38em;
+}
+.options {
+  width: 10em;
+}
+.rightanswer {
+  width: 2em;
+}
+.difficultylevel {
+  width: 8em;
+}
+.answertype {
+  width: 8em;
 }
 </style>

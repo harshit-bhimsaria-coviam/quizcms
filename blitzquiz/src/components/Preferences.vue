@@ -65,6 +65,9 @@ export default {
           this.selected.interest.push(ele.categoryName);
         }
       });
+      if(this.selected.length === 0)
+        alert("Select atleast one!!")
+      else
       console.log(this.selected);
       //this.$store.dispatch('savePreferences', this.selected)
     }
